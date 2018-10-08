@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.capgemini.customerapp.entity.Customer;
+import com.capgemini.customerapp.exceptions.CustomerAlreadyRegisteredException;
 import com.capgemini.customerapp.exceptions.CustomerNotFoundException;
 import com.capgemini.customerapp.service.CustomerService;
 
@@ -20,51 +20,39 @@ import com.capgemini.customerapp.service.CustomerService;
 public class CustomerController {
 	@Autowired
 	private CustomerService customerService;
+
 	@PostMapping("/customer")
-	public @ResponseBody ResponseEntity<Customer> addCustomer(@RequestBody Customer customer) {
+	public ResponseEntity<Customer> addCustomer(@RequestBody Customer customer) throws CustomerAlreadyRegisteredException {
 		ResponseEntity<Customer> responseEntity = new ResponseEntity<Customer>(customerService.addCustomer(customer),
 				HttpStatus.OK);
 		return responseEntity;
 	}
+	
+	@PostMapping("/customer/auth")
+	public ResponseEntity<Customer> authentication(@RequestBody Customer customer) throws CustomerNotFoundException{
+		ResponseEntity<Customer> responseEntity = new ResponseEntity<Customer>(
+				customerService.authenticate(customer.getCustomerId(), customer.getCustomerPassword()), HttpStatus.OK);
+		return responseEntity;
+	}
+	@GetMapping("/customer/{customerId}")
+	public ResponseEntity<Customer> findCustomerById(@PathVariable int customerId) throws CustomerNotFoundException  {
+		Customer c = customerService.getCustomerById(customerId);
+		return new ResponseEntity<Customer>(c, HttpStatus.OK);
+
+	}
 
 	@PutMapping("/customer")
 	public ResponseEntity<Customer> updateCustomer(@RequestBody Customer customer) {
-		try {
-			customerService.getCustomerById(customer.getCustomerId());
-			return new ResponseEntity<Customer>(customerService.updateCustomer(customer), HttpStatus.OK);
-		} catch (CustomerNotFoundException exception) {
-			// logged the exception
-		}
-		return new ResponseEntity<Customer>(HttpStatus.NOT_FOUND);
-	}
-
-	@GetMapping("/customer/{customerId}")
-	public ResponseEntity<Customer> getCustomerById(@PathVariable int customerId) {
-		try {
-			Customer customerdb = customerService.getCustomerById(customerId);
-			return new ResponseEntity<Customer>(customerdb, HttpStatus.OK);
-		} catch (CustomerNotFoundException exception) {
-			// logged the exception
-		}
-		return new ResponseEntity<Customer>(HttpStatus.NOT_FOUND);
+		return new ResponseEntity<Customer>(customerService.updateCustomer(customer), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/customer/{customerId}")
-	public ResponseEntity<Customer> deleteCustomer(@PathVariable int customerId) {
-		try {
-			Customer customerdb = customerService.getCustomerById(customerId);
-			if (customerdb != null) {
-				customerService.deleteCustomer(customerdb);
-				return new ResponseEntity<Customer>(HttpStatus.OK);
-			}
-		} catch (CustomerNotFoundException exception) {
-			// logged the exception
-		}
-		return new ResponseEntity<Customer>(HttpStatus.NOT_FOUND);
-	}
-	@PostMapping("/customer/authentication")
-	public ResponseEntity<Customer> authenticate(@RequestBody Customer customer) throws CustomerNotFoundException {
-		
-		return new ResponseEntity<Customer>(customerService.authenticate(customer), HttpStatus.FOUND);
+	public ResponseEntity<Customer> deleteProduct(@PathVariable int customerId) throws CustomerNotFoundException {
+
+		Customer c = customerService.getCustomerById(customerId);
+
+		customerService.deleteCustomer(customerId);
+		return new ResponseEntity<Customer>(HttpStatus.OK);
+
 	}
 }

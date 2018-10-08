@@ -1,17 +1,20 @@
 package com.capgemini.customerapp.service;
 
+
 import com.capgemini.customerapp.entity.Customer;
+import com.capgemini.customerapp.exceptions.CustomerAlreadyRegisteredException;
 import com.capgemini.customerapp.exceptions.CustomerNotFoundException;
 
 public interface CustomerService {
-	public Customer addCustomer(Customer customer);
 
-	public Customer authenticate(Customer customer) throws CustomerNotFoundException;
+	public Customer addCustomer(Customer customer) throws CustomerAlreadyRegisteredException ;
 
-	public Customer getCustomerById(int customerId) throws CustomerNotFoundException;
+	public Customer authenticate(int customerId, String customerPassword) throws CustomerNotFoundException;
 
 	public Customer updateCustomer(Customer customer);
 
-	public void deleteCustomer(Customer productFromDb);
+	public Customer getCustomerById(int customerId) throws CustomerNotFoundException;
+
+	public void deleteCustomer(int customerId);
 
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.capgemini.customerapp.entity.ErrorMessage;
+import com.capgemini.customerapp.exceptions.CustomerAlreadyRegisteredException;
 import com.capgemini.customerapp.exceptions.CustomerNotFoundException;
 
 @ControllerAdvice
@@ -30,6 +31,14 @@ public class ExceptionController {
 		return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
 	}
 
-	
+	@ExceptionHandler(value = CustomerAlreadyRegisteredException.class)
+	public ResponseEntity<ErrorMessage> customerAlreadyRegisteredException(CustomerAlreadyRegisteredException customerAlreadyRegisteredException,
+			HttpServletRequest request) {
+		ErrorMessage errorMessage = new ErrorMessage(request.getRequestURI(), customerAlreadyRegisteredException.getMessage(),
+				LocalDateTime.now(), HttpStatus.NOT_FOUND);
+		log.error(errorMessage.toString());
+		return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
+	}
+
 
 }
